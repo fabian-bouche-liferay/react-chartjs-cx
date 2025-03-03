@@ -24,7 +24,7 @@
       "react-app/jest"
     ]
   },
-  "homepage": "https://fabian-bouche-liferay.github.io/liferay-graph-cx/",
+  "homepage": "https://fabian-bouche-liferay.github.io/react-chartjs-cx/",
   "browserslist": {
     "production": [
       ">0.2%",
