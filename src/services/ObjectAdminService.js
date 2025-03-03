@@ -49,6 +49,7 @@ class ObjectAdminService {
                 id
                 name
                 businessType
+                label
                 listTypeDefinitionId
               }
             }

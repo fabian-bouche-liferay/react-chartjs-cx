@@ -13,7 +13,20 @@ const getFormattedValue = (value, type) => {
     }
 };
 
-export function useChartData(dataPoints, configuration) {
+const formatDate = (items, locale) => {
+    
+    return items.map(item => {
+        const date = new Date(item);
+
+        if (!isNaN(date.getTime())) {
+            return date.toLocaleDateString(locale);
+        }
+
+        return item;
+    });
+}
+
+export function useChartData(dataPoints, configuration, locale) {
     return useMemo(() => {
         if (!dataPoints.length) return { labels: [], datasets: [] };
 
@@ -35,7 +48,7 @@ export function useChartData(dataPoints, configuration) {
 
             valueKeys.forEach((valueKey) => {
                 const value = getNestedValue(item, valueKey.field) || 0;
-                const datasetLabel = `${categoryPath} - ${valueKey.field}`;
+                const datasetLabel = `${categoryPath} - ${valueKey.label[locale.replace("-", "_")]}`;
 
                 if (!groupedData[formattedXValue][datasetLabel]) {
                     groupedData[formattedXValue][datasetLabel] = 0;
@@ -64,6 +77,8 @@ export function useChartData(dataPoints, configuration) {
             };
         });
 
-        return { labels, datasets };
+        const formattedLabels = formatDate(labels, locale);
+
+        return { labels: formattedLabels, datasets: datasets };
     }, [dataPoints, configuration]);
 }

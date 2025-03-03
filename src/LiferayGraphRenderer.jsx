@@ -2,7 +2,7 @@ import React from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, PointElement, LineElement, LinearScale, BarElement, Filler, Tooltip, Legend } from "chart.js";
 import { useLiferayData } from "./hooks/useLiferayData";
-import { useChartData } from "./hooks/useChartData";
+import { useChartData } from "./hooks/useChartData.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Filler, Tooltip, Legend);
 
@@ -10,7 +10,7 @@ function LiferayGraphRenderer(props) {
 
     const dataPoints = useLiferayData(props.baseURL, props.objectDefinition);
 
-    const { labels, datasets } = useChartData(dataPoints, props.configuration);
+    const { labels, datasets } = useChartData(dataPoints, props.configuration, props.locale);
 
     if(props.graphType === "Bar") {
         const chartData = { labels, datasets };

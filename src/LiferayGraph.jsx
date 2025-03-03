@@ -26,6 +26,20 @@ function LiferayGraph(props) {
   useEffect(() => {
     if (!selectedObjectDefinition || !selectedObjectDefinition.objectFields) return;
     
+    if(props.valueSeries !== null && props.valueSeries !== undefined) {
+      const fieldNames = props.valueSeries.split(",");
+      setSelectedValueFields(selectedObjectDefinition.objectFields.filter(item => fieldNames.includes(item.name)));
+    }
+    if(props.categorySeries !== null && props.categorySeries !== undefined) {
+      const fieldNames = props.categorySeries.split(",");
+      setSelectedCategoryFields(selectedObjectDefinition.objectFields.filter(item => fieldNames.includes(item.name)));
+    }
+    setSelectedFilterFields([]);
+
+  }, [selectedObjectDefinition]);
+
+  useEffect(() => {
+
     const getFieldWithType = (id) => {
       const field = selectedObjectDefinition.objectFields.find(field => field.id == id);
     
@@ -33,14 +47,15 @@ function LiferayGraph(props) {
     
       return {
         field: field.businessType === "PICKLIST" ? `${field.name}.name` : field.name,
+        label: field.label,
         type: field.businessType,
       };
     };
-      
+
     setConfiguration({
       values: selectedValueFields
         .map(field => getFieldWithType(field.id))
-        .filter(Boolean), // Supprime les éventuels `null`
+        .filter(Boolean),
   
       categories: selectedCategoryFields
         .map(field => getFieldWithType(field.id))
@@ -50,15 +65,24 @@ function LiferayGraph(props) {
         .map(field => getFieldWithType(field.id))
         .filter(Boolean),
     });
+
+  }, [selectedValueFields, selectedCategoryFields, selectedFilterFields]);
   
-  }, [selectedValueFields, selectedCategoryFields, selectedFilterFields, selectedObjectDefinition]);
-
-
   useEffect(() => {
 
-    ObjectAdminService.getObjectDefinitions(props.baseURL).then(data => {
-      setObjectDefinitions(data);
-    });
+    if(props.objectDefinitionId === null || props.objectDefinitionId === undefined) {
+      ObjectAdminService.getObjectDefinitions(props.baseURL).then(data => {
+        setObjectDefinitions(data);
+      });
+    } else {
+      ObjectAdminService.getObjectDefinition(props.baseURL, props.objectDefinitionId).then(data => {
+        console.log(data);
+        setSelectedObjectDefinition(data);
+      });
+      if(props.graphType !== null && props.graphType !== undefined) {
+        setGraphType(props.graphType);
+      }
+    }
 
   }, [props]);
 
@@ -66,46 +90,51 @@ function LiferayGraph(props) {
     const objectDefinitionId = value;
     ObjectAdminService.getObjectDefinition(props.baseURL, objectDefinitionId).then(data => {
       setSelectedObjectDefinition(data);
-      setSelectedValueFields([]);
-      setSelectedCategoryFields([]);
-      setSelectedFilterFields([]);
     });
   }
 
   return (
     <>
-      <Provider spritemap={props.spriteMap}>
-        <ClaySelect 
-            aria-label="Select Label"
-            id="mySelectId"
-            onChange={handleSelectObjectDefinition}>
-          <ClaySelect.Option
-            key=""
-            label=""
-            value=""
-          />
-          {objectDefinitions.map((item) => (
+      {(props.objectDefinitionId === null || props.objectDefinitionId === undefined) && (
+
+        <Provider spritemap={props.spriteMap}>
+          <ClaySelect 
+              aria-label="Select Label"
+              id="mySelectId"
+              onChange={handleSelectObjectDefinition}>
             <ClaySelect.Option
-              key={item.id}
-              label={item.name}
-              value={item.id}
+              key=""
+              label=""
+              value=""
             />
-          ))}
-        </ClaySelect>
-      </Provider>
+            {objectDefinitions.map((item) => (
+              <ClaySelect.Option
+                key={item.id}
+                label={item.name}
+                value={item.id}
+              />
+            ))}
+          </ClaySelect>
+        </Provider>
+
+      )}
       {(selectedObjectDefinition !== undefined) && (
         <>
 
-          <LiferayGraphBuilderTreeView 
-            datasetFields={selectedObjectDefinition.objectFields}
-            selectedValueFields={selectedValueFields}
-            selectedCategoryFields={selectedCategoryFields}
-            selectedFilterFields={selectedFilterFields}            
-            setSelectedValueFields={setSelectedValueFields}
-            setSelectedCategoryFields={setSelectedCategoryFields}
-            setSelectedFilterFields={setSelectedFilterFields}
+          {(props.objectDefinitionId === null || props.objectDefinitionId === undefined) && (
+
+            <LiferayGraphBuilderTreeView 
+              datasetFields={selectedObjectDefinition.objectFields}
+              selectedValueFields={selectedValueFields}
+              selectedCategoryFields={selectedCategoryFields}
+              selectedFilterFields={selectedFilterFields}            
+              setSelectedValueFields={setSelectedValueFields}
+              setSelectedCategoryFields={setSelectedCategoryFields}
+              setSelectedFilterFields={setSelectedFilterFields}
             >
-          </LiferayGraphBuilderTreeView>
+            </LiferayGraphBuilderTreeView>
+
+          )}
 
           {configuration.values.length > 0 && configuration.categories.length > 0 && (
 
@@ -114,6 +143,7 @@ function LiferayGraph(props) {
               objectDefinition={selectedObjectDefinition}
               configuration={configuration}
               graphType={graphType}
+              locale={props.locale}
             >
             </LiferayGraphRenderer>
 

@@ -10,7 +10,14 @@ class LiferayGraphWebComponent extends HTMLElement {
             this.appendChild(reactRoot);
         }
 
-        ReactDOM.render(<LiferayGraph baseURL="http://localhost:8080" />, this.querySelector('.react-root'));
+        ReactDOM.render(<LiferayGraph 
+            baseURL={this.getAttribute("baseURL")}
+            objectDefinitionId={this.getAttribute("objectDefinitionId")}
+            valueSeries={this.getAttribute("valueSeries")}
+            categorySeries={this.getAttribute("categorySeries")}
+            graphType={this.getAttribute("graphType")}
+            locale={this.getAttribute("locale")}
+            />, this.querySelector('.react-root'));
     }
 
     disconnectedCallback() {
