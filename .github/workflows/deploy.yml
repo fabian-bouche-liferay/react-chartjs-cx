@@ -34,8 +34,8 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: build/static
-          target-folder: builds/${{ env.BUILD_DATE }}
+          folder: build
+          target-folder: builds/${{ env.BUILD_DATE }}/static
 
       - name: Update index.html
         run: |
