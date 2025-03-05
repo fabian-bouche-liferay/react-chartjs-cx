@@ -8,7 +8,7 @@ export function useLiferayData(baseURL, objectDefinition) {
 
     const { loadMore, resource } = useResource({
         fetch: async (link) => {
-            const result = await fetch(link);
+            const result = await window.Liferay.Util.fetch(link);
             const json = await result.json();
 
             setLastPage(json.lastPage);
