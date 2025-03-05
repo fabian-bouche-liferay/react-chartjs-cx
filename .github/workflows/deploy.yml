@@ -27,8 +27,20 @@ jobs:
       - name: Build project
         run: yarn build
 
+      - name: Get current date
+        run: echo "BUILD_DATE=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: build  # Change en fonction de ton dossier de build
+          folder: build
+          target-folder: builds/${{ env.BUILD_DATE }}
+
+      - name: Update index.html
+        run: |
+          echo "<html><body><h1>Available versions</h1><ul>" > build/index.html
+          for dir in $(ls -d builds/*); do
+            echo "<li><a href='${dir}/'>${dir}</a></li>" >> build/index.html
+          done
+          echo "</ul></body></html>" >> build/index.html
